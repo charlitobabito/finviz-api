@@ -17,17 +17,24 @@ def get_ratings():
         return jsonify({"error": "Missing symbol parameter"}), 400
 
     url = f'https://finviz.com/quote.ashx?t={symbol}'
-    headers = {'User-Agent': 'Mozilla/5.0'}
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Referer': 'https://www.google.com/',
+        'Connection': 'keep-alive'
+    }
 
     try:
-        res = requests.get(url, headers=headers)
+        res = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(res.text, 'html.parser')
 
         table = soup.find('table', class_='fullview-ratings-outer')
         if not table:
             return jsonify([])
 
-        rows = table.find_all('tr')[1:]  # Skip header
+        rows = table.find_all('tr')[1:]  # Ignore header
         data = []
 
         for row in rows:
